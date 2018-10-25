@@ -9,7 +9,7 @@
 <%@page import="com.smartValue.support.map.LuQueryDetails"%>
 
 <%@page errorPage="errorPage.jsp"%>
-<%@page  contentType="text/html;charset=UTF-8"%>	
+<%@page  contentType="text/html;charset=UTF-8"%>
 <%request.setCharacterEncoding("UTF-8");%>
 <% String appURL = Support.Misc.getAppURL(request) ;  %>
 
@@ -37,9 +37,6 @@
     <!-- PivotTable.js libs from ../dist -->
     <link rel="stylesheet" type="text/css" href="<%=appURL%>/pivottable-master/dist/pivot.css">
     <script type="text/javascript" src="<%=appURL%>/pivottable-master/dist/pivot.js"></script>
-    <script type="text/javascript" src="<%=appURL%>/pivottable-master/dist/export_renderers.js"></script>
-    <script type="text/javascript" src="<%=appURL%>/pivottable-master/dist/d3_renderers.js"></script>
-    <script type="text/javascript" src="<%=appURL%>/pivottable-master/dist/c3_renderers.js"></script>
 
 	<!--  Enable Google Charts -->
 		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -52,9 +49,9 @@
 
 <!-- script for DataTable (Search & sorting )  -->
 	<link rel="stylesheet" type="text/css" href="<%=appURL%>/includes/dataTable/dt-1.10.13/datatables.min.css"/>
- 
+
 	<script type="text/javascript" src="<%=appURL%>/includes/dataTable/dt-1.10.13/datatables.min.js"></script>
-<!-- End of script for DataTable (Search & sorting )  -->        
+<!-- End of script for DataTable (Search & sorting )  -->
 
 <%@ include file="includes/jquery_commons.js"%>
 <script type="text/javascript">
@@ -64,34 +61,32 @@ $(window).load(function() {
 </script>
 </head>
 <div>
-	
-	
+
+
 	<%@ include file ="renderQueryResultBackEnd.jsp" %>
-     
+
 <strong><br>
 <div id="div<%=id%>_<%=queryIndex%>" >
-<%=titles[queryIndex]%> 
+<%=titles[queryIndex]%>
 
 <%-- // This Script To Display the Data in a Pivot Table --%>
 <script	language="JavaScript" type="text/JavaScript">
 		var detailHidden_<%=queryIndex%> = true;
 		var divHight_<%=queryIndex%>  ;
 		var alreadyRendered_<%=queryIndex%> = false ;
-		google.load("visualization", "1", {packages:["corechart", "charteditor"]});		
+		google.load("visualization", "1", {packages:["corechart", "charteditor"]});
 
 		function toggleShowPivotTable_<%=queryIndex %>(showAnalytics)
 		{
 			var pivotDiv = document.all['Pivot_out<%=id%>_<%=queryIndex %>_container'] ;
 			var controlButton = document.all['toggleViewPivitTable_<%=queryIndex %>'] ;
 			try {
-			//if (! alreadyRendered_<%=queryIndex%> ) 
+			//if (! alreadyRendered_<%=queryIndex%> )
 				{
+
 					var derivers = $.pivotUtilities.derivers;
 			        var renderers = $.extend($.pivotUtilities.renderers,
-			        		$.pivotUtilities.gchart_renderers ,
-			                $.pivotUtilities.c3_renderers,
-			                $.pivotUtilities.d3_renderers,
-			                $.pivotUtilities.export_renderers );
+			            $.pivotUtilities.gchart_renderers);
 					var sum = $.pivotUtilities.aggregatorTemplates.sum;
 					var average = $.pivotUtilities.aggregatorTemplates.average;
 					var numberFormat = $.pivotUtilities.numberFormat;
@@ -101,55 +96,55 @@ $(window).load(function() {
 				}
 				if (showAnalytics)
 					$("#Pivot_out<%=id%>_<%=queryIndex %>").pivotUI($("#resSetTable<%=id%>_<%=queryIndex %>") , pivotAttributes  );
-		            else 
+		            else
 		            $("#Pivot_out<%=id%>_<%=queryIndex %>").pivot($("#resSetTable<%=id%>_<%=queryIndex %>") , pivotAttributes  );
-				
-				// This Script is To Enable saving the pivot table status  
+
+				// This Script is To Enable saving the pivot table status
 				$("#savePivotStatus<%=id%>_<%=queryIndex%>").on("click", function(){
 	                var config = $("#Pivot_out<%=id%>_<%=queryIndex%>").data("pivotUIOptions");
 	                var config_copy = JSON.parse(JSON.stringify(config));
 	                //delete some values which will not serialize to JSON
 	                delete config_copy["aggregators"];
 	                delete config_copy["renderers"];
-	                pivotAttributes = JSON.stringify(config_copy) ; 
+	                pivotAttributes = JSON.stringify(config_copy) ;
 	                //$.cookie("pivotConfig<%=id%>_<%=queryIndex%>", JSON.stringify(config_copy));
-	                
-				    // Saving new value to db  
+
+				    // Saving new value to db
 					var updateResultDivID = 'updateResult<%=id%>_<%=queryIndex %>' ;
 				    var updateURL =  '/SmartTool/updateDBAttribute.jsp?isHijriDate=false&isDateTime=false&isDate=false&tableName=LU_QUERY_DETAILS&tableOwner=SUPPORT&columnName=PIVOTTABLE_INIT_PARAMS&rowIdValue=<%=queryDetails.getRowIdString()%>&newValue=' + adjustNewValue(encodeURIComponent(pivotAttributes) ) ;
-	                // alert('UpdateURL = ' +  updateURL ) ; 
-	                sendAjaxRequestToJsp(encodeURI(updateURL) , updateResultDivID) ; 
+	                // alert('UpdateURL = ' +  updateURL ) ;
+	                sendAjaxRequestToJsp(encodeURI(updateURL) , updateResultDivID) ;
 
 	            });
 
 	            $("#restorePivotStatus<%=id%>_<%=queryIndex%>").on("click", function(){
 	                $("#Pivot_out<%=id%>_<%=queryIndex%>").pivotUI($("#resSetTable<%=id%>_<%=queryIndex %>"), JSON.parse(pivotAttributes), true);
             	});
-            
+
 			}
-			
+
 		   	catch ( err )
-		   	{ 
-			  pivotDiv.style.color = "red" ; 
-		   	  pivotDiv.innerHTML = 'Smart Tool Error PVT:001: Unable To Render Pivoit Table Due To : ' + err ; 
-		   	  throw err ; 
+		   	{
+			  pivotDiv.style.color = "red" ;
+		   	  pivotDiv.innerHTML = 'Smart Tool Error PVT:001: Unable To Render Pivoit Table Due To : ' + err ;
+		   	  throw err ;
 		   	 }
-		   	finally 
+		   	finally
 		   	{divHight_<%=queryIndex%>  = pivotDiv.style.height ;
-		     alreadyRendered_<%=queryIndex%> = true ;}      
-			
-			
+		     alreadyRendered_<%=queryIndex%> = true ;}
+
+
 			if (detailHidden_<%=queryIndex%>)
 			{
 			pivotDiv.style.height = "" ; //divHight_<%=queryIndex%> ;
   			pivotDiv.style.visibility = 'visible';
 			detailHidden_<%=queryIndex %> = false;
-			controlButton.title = 'Hide Pivot Table' ; 
+			controlButton.title = 'Hide Pivot Table' ;
 			}
 			else
 			{
-			divHight_<%=queryIndex%> = 	pivotDiv.style.height ; 
-			pivotDiv.style.height = 0 ; 
+			divHight_<%=queryIndex%> = 	pivotDiv.style.height ;
+			pivotDiv.style.height = 0 ;
 			pivotDiv.style.visibility = 'hidden';
 			detailHidden_<%=queryIndex %> = true;
 			controlButton.title = 'Show Pivot Table' ;
@@ -158,24 +153,24 @@ $(window).load(function() {
 </script>
 
 <script>
-// Jquery Code to Add Search and filtering cabability to the datatable 
-function showTableFiltering_<%=queryIndex %>() 
+// Jquery Code to Add Search and filtering cabability to the datatable
+function showTableFiltering_<%=queryIndex %>()
 {
-	var filterRow = document.getElementById('filteringRow_<%=id %>_<%=queryIndex %>') ; 
-	filterRow.style.display = 'table-row' ; 
+	var filterRow = document.getElementById('filteringRow_<%=id %>_<%=queryIndex %>') ;
+	filterRow.style.display = 'table-row' ;
     // Setup - add a text input to each footer cell
     $('#resSetTable<%=id%>_<%=queryIndex %> thead td').each( function () {
         var title = $(this).text();
         $(this).html(  '<input type="text" placeholder="Search ' + title + '"  size = 10 />' );
     } );
- 
+
     // DataTable
     var table = $('#resSetTable<%=id%>_<%=queryIndex %>').DataTable();
- 
+
     // Apply the search
     table.columns().every( function () {
         var that = this;
- 
+
         $( 'input', this.header() ).on( 'keyup change', function () {
             if ( that.search() !== this.value ) {
                 that
@@ -185,7 +180,7 @@ function showTableFiltering_<%=queryIndex %>()
         } );
     } );
 }
-</script>	
+</script>
 <%if ( ! printable) {%>
 	<img title="Show Pivot Table"  name="toggleViewPivitTable_<%=queryIndex %>" src="<%=appURL%>/images/PivotTable.ico" height="25" onclick="toggleShowPivotTable_<%=queryIndex %>(true);">
 	<img title="Show Table Filtering"  name="toggleViewPivitTable_<%=queryIndex %>" src="<%=appURL%>/images/tableFilterIco.jpg" height="20" onclick="showTableFiltering_<%=queryIndex %>();">
@@ -220,9 +215,9 @@ if (rowIdFound && !printable)
     <div id = "updateResult<%=id%>_<%=queryIndex %>"> </div>
     <br /><br /><br />
  	<div id = "Pivot_out<%=id%>_<%=queryIndex %>"    >
-		Not Able to render Data in Pivot Table 
+		Not Able to render Data in Pivot Table
 	</div>
-</div> 
+</div>
 
 </div>
 </strong>
@@ -235,48 +230,48 @@ if (rowIdFound && !printable)
         if (rowIdFound & !printable){%>
 		<th align="center" bgcolor="#0099CC"><strong><font color="#FFFFFF">E</font></strong></th>
 		<%}
-        
+
         String queryString = request.getQueryString();
         int orderByIndexInRequest = (queryString!=null)? queryString.indexOf("_Order") : -1 ;
         if (queryString != null && orderByIndexInRequest != -1 )
         {
          queryString= queryString.substring(0,orderByIndexInRequest-1);
         }
-             
+
         for (int count = 1 ; count<=columnCount ; count++ )
-        { 
+        {
           //----Do not show rowid column
-		  
+
           if (rowIdFound && count == rowIdIndex)
           { continue; }
           //---End of Do not show rowid column
-          
+
           columnTypes[count] = rsmd.getColumnTypeName(count);
           columnNames[count] =  rsmd.getColumnName(count);
           String columnDisplayName = columnNames[count] ;
-          String columnComments = columnDisplayName ; 
+          String columnComments = columnDisplayName ;
           try{
           	TableMaintDetails tmd = tmm.getTmdByColumnName( columnNames[count] ) ;
            	columnDisplayName = (tmd!=null)? tmd.getDisplayNameValue() : columnNames[count] ;
            	columnComments = (tmd!=null && tmd.getCommentsValue() != null )? tmd.getCommentsValue() : columnComments ;
            }
-           catch (Exception e){ columnDisplayName = Support.Misc.repalceAll(columnNames[count],"_"," ") ;} 
+           catch (Exception e){ columnDisplayName = Support.Misc.repalceAll(columnNames[count],"_"," ") ;}
           %>
            <th align="center" nowrap=true bgcolor="#0099CC" title="<%=columnComments%>" id = "<%=columnDisplayName%>" ><strong><font	color="#FFFFFF"><%=columnDisplayName%></font></strong></th>
-          
-           
-		<!-- 
-		<th align="center" nowrap=true bgcolor="#0099CC" title="<%=columnComments%>" id = "<%=columnDisplayName%>" ><strong><font	color="#FFFFFF"><%=columnDisplayName%></font></strong><% 
-			boolean showSortingArrows = !AutoLog && !printable ; 
-			if (showSortingArrows){  %> 
-			
+
+
+		<!--
+		<th align="center" nowrap=true bgcolor="#0099CC" title="<%=columnComments%>" id = "<%=columnDisplayName%>" ><strong><font	color="#FFFFFF"><%=columnDisplayName%></font></strong><%
+			boolean showSortingArrows = !AutoLog && !printable ;
+			if (showSortingArrows){  %>
+
 			<a	href="?<%=queryString%>&_OrderAscBy=<%=count%>&_QuerySeq=<%=queryIndex%>">
-				<img border="0" src="<%=appURL%>/images/asc.gif" width="10" height="10"></a> 
+				<img border="0" src="<%=appURL%>/images/asc.gif" width="10" height="10"></a>
 			<a	href="?<%=queryString%>&_OrderDescBy=<%=count%>&_QuerySeq=<%=queryIndex%>">
 			<img border="0" src="<%=appURL%>/images/desc.gif" width="10" height="10"></a> <%}%>
 </th>
 		<-->
-		 
+
 		<%
          }
         %>
@@ -287,31 +282,31 @@ if (rowIdFound && !printable)
 	        if (rowIdFound & !printable){%>
 			<th align="center" ><strong><font color="#FFFFFF">E</font></strong></th>
 			<%}
-	
+
 			for (int count = 1 ; count<=columnCount ; count++ )
-	    	{ 
+	    	{
 		          if (rowIdFound && count == rowIdIndex)
 		          { continue; }
 		          //---End of Do not show rowid column
-		          
+
 		          columnTypes[count] = rsmd.getColumnTypeName(count);
 		          columnNames[count] =  rsmd.getColumnName(count);
 		          String columnDisplayName = columnNames[count] ;
-		          String columnComments = columnDisplayName ; 
+		          String columnComments = columnDisplayName ;
 		          try{
 		          	TableMaintDetails tmd = tmm.getTmdByColumnName( columnNames[count] ) ;
 		           	columnDisplayName = (tmd!=null)? tmd.getDisplayNameValue() : columnNames[count] ;
 		           	columnComments = (tmd!=null && tmd.getCommentsValue() != null )? tmd.getCommentsValue() : columnComments ;
 		           }
-		           catch (Exception e){ columnDisplayName = Support.Misc.repalceAll(columnNames[count],"_"," ") ;} 
-	
-				  %> <th><%=columnDisplayName%></th> <% 
-	    	} %>  
-				
-		</tr>	
+		           catch (Exception e){ columnDisplayName = Support.Misc.repalceAll(columnNames[count],"_"," ") ;}
+
+				  %> <th><%=columnDisplayName%></th> <%
+	    	} %>
+
+		</tr>
 	</thead>
 	<%
-       
+
         //-------rendering Data--------------------
         int rownum = -1;
         String databaseName = con.getMetaData().getDatabaseProductName();
@@ -323,35 +318,35 @@ if (rowIdFound && !printable)
         while (rs.next())
         { rownum++;
           evenRow = !evenRow;
-          
-          
+
+
 		 try{ rowIdValue = rs.getString(rowIdIndex) ;  }
 	     catch (Exception e) {}
-	  	 if ( filterByRowId ) 
+	  	 if ( filterByRowId )
 			{
-				boolean isTheRequestedRow = selectedOraRowId.equals(rowIdValue) ;  
-				if ( ! isTheRequestedRow ) 
+				boolean isTheRequestedRow = selectedOraRowId.equals(rowIdValue) ;
+				if ( ! isTheRequestedRow )
 				{
-					continue ; 
+					continue ;
 				}
 			}
-	  	%><tr class="basicTable"><%        
-		if (rowIdFound && !printable) //----------if rowid found then  render an edit cell at the begining 
+	  	%><tr class="basicTable"><%
+		if (rowIdFound && !printable) //----------if rowid found then  render an edit cell at the begining
           {
             rowIdValueUrlEncoded = (rowIdValue != null)? java.net.URLEncoder.encode(rowIdValue) : "Null?";
-            String uploadDirPath = "DB_Attachs/"+tableOwner + "/" + tableName +"/" +rowIdValueUrlEncoded ;  
+            String uploadDirPath = "DB_Attachs/"+tableOwner + "/" + tableName +"/" +rowIdValueUrlEncoded ;
             String uploadLinkHref = appURL+"/getClientFile.jsp?NoDBRecord=N&queryIndex="+queryIndex+"&"+request.getQueryString()+"&serverName=127.0.0.1&dirPath="+ uploadDirPath ;
             uploadLinkHref +=  "&queryId="+id +"&"+SqlReader.SELECTED_ORA_ROWID + "=" + rowIdValueUrlEncoded + "&"+SqlReader.QUERY_INDEX_TO_FILTER_BY_ROWID+ "="+queryIndex ;
-    		int attachsCountInt = db.getTableAttachmentCount(tableOwner , tableName , rowIdValue ) ; 
-            boolean renderCount = attachsCountInt > 0 ;  
+    		int attachsCountInt = db.getTableAttachmentCount(tableOwner , tableName , rowIdValue ) ;
+            boolean renderCount = attachsCountInt > 0 ;
             String objApprovLinkHref = Misc.repalceAll(uploadLinkHref , "getClientFile" , "objectApprovalData" );
             %>
             <td><strong> <a title = "Update data for <%=tmm.getObjectNameValue() %> ... تعديل بيانات <%=tmm.getObjectName_Value() %>" target='Table Object Editor '
 								href='<%=appURL%>/<%=tableObjectEditorPage%>?<%=rowidColumnName%>=<%=rowIdValueUrlEncoded%><%=(hasSpecicEditor)? "" : "&tableName="+ tableOwner.toUpperCase()+"."+tableName  %>'>
-								<img alt="" src="<%=appURL%>/images/editrow.gif" height="20" width="20"> 
-			
-				<% boolean showAttachlLink = tmm.getAttribute("ENABLE_ATTACHEMENTS").getBooleanValue() ; 
-			 		if (showAttachlLink) 
+								<img alt="" src="<%=appURL%>/images/editrow.gif" height="20" width="20">
+
+				<% boolean showAttachlLink = tmm.getAttribute("ENABLE_ATTACHEMENTS").getBooleanValue() ;
+			 		if (showAttachlLink)
 			 		{%>
 				<a title = "Add New Attachement For <%=tmm.getObjectNameValue() %> ... إضافة مستند خاص ب<%=tmm.getObjectName_Value() %>" target = "UploadFile" href = "<%=uploadLinkHref %>" 	>
 					<img alt="" src="<%=appURL%>/images/attach_Icon.gif" height="20" width="20">
@@ -360,8 +355,8 @@ if (rowIdFound && !printable)
 						<a title="عدد الملفات الملحقة : <%=attachsCountInt%> "  target = "UploadFile" href = "<%=uploadLinkHref %>"  ><%= attachsCountInt %></a>
 						<%} %>
 					<%} %>
-				<% boolean showApprovalLink = tmm.getAttribute("ENABLE_APPROVAL_CYCLE").getBooleanValue() ; 
-			 		if (showApprovalLink) 
+				<% boolean showApprovalLink = tmm.getAttribute("ENABLE_APPROVAL_CYCLE").getBooleanValue() ;
+			 		if (showApprovalLink)
 			 		{%>
 						<a title = "Check Approvals " <%=tmm.getObjectName_Value() %>" target = "Check Approvals" href = "<%=objApprovLinkHref %>" 	>
 							<img alt="" src="<%=appURL%>/images/approvalCycle.jpg" height="20" width="20">
@@ -370,11 +365,11 @@ if (rowIdFound && !printable)
 			</td>
 		<%
           }
-          
+
           String columnValue = "";
-          boolean isOracle = databaseName.equals("Oracle") ; 
+          boolean isOracle = databaseName.equals("Oracle") ;
           for (int count = 1 ; count<=columnCount ; count++ )
-          { 
+          {
             //----Do not show rowid column
             if (rowIdFound && count == rowIdIndex)
             { continue; }
@@ -388,23 +383,23 @@ if (rowIdFound && !printable)
                 //--------------For Oracle Database---------
                 if (isOracle)
                 { String columnType = columnTypes[count].toUpperCase() ;
-                 if ( columnType.equals("DATE") 
+                 if ( columnType.equals("DATE")
                 	  || columnType.equals("TIMESTAMP")
-                      || columnType.equals("NUMBER") 
-                      || columnType.equals("ROWID") 
-                      || columnType.equals("VARCHAR2") 
+                      || columnType.equals("NUMBER")
+                      || columnType.equals("ROWID")
+                      || columnType.equals("VARCHAR2")
                       || columnType.equals("NVARCHAR2")
-                      || columnType.equals("RAW") 
-                      || columnType.equals("CHAR") 
+                      || columnType.equals("RAW")
+                      || columnType.equals("CHAR")
                       || columnType.equals("LONG")
-                    ) 
-                 { 
+                    )
+                 {
                   columnValue= rs.getString(count);
                   columnValue = (columnValue == null )? "&nbsp;": columnValue;
                  }
                  //--------------If Column Type is CLOB 0r LONG --Or a Varchar with size more than maxDisplayableSize---
-                 if (columnTypes[count].toUpperCase().equals("BLOB") 
-              		   || columnTypes[count].toUpperCase().equals("CLOB")  
+                 if (columnTypes[count].toUpperCase().equals("BLOB")
+              		   || columnTypes[count].toUpperCase().equals("CLOB")
               		   //||columnTypes[count].toUpperCase().equals("LONG")
               		   || ( columnValue.length() > maxDisplayableSize && columnValue.indexOf("</a>") == -1) )
                  {
@@ -412,7 +407,7 @@ if (rowIdFound && !printable)
                    {
                   	columnValue = "<a target= CLOBReader href = "+appURL+"/oracleCLOBReader.jsp?addXmlHeader=N&execAgainstRep="+ ( (execAgainstRep)? "Y":"N") +"&columnName="+columnNames[count]+"&rowId="+rowIdValueUrlEncoded+"&tableName="+tableName+"&tableOwner="+tableOwner+">"+columnNames[count]+"</a>" ;
                    }
-                   else 
+                   else
                    {
                      throw new Exception ("Query Contains CLOB Column. it Should include Rowid also");
                    }
@@ -429,26 +424,26 @@ if (rowIdFound && !printable)
           catch (Exception e) {  rs.close();   stmt.close(); throw new Exception ("Unable to Read Column Number : " + count + " Row Number "+ rownum +" Due to : " + e.getMessage()) ;}
             //--------------------Rendering The Column Value---------------
         	%><td><%
-            if (columnValue.length()> maxDisplayableSize   //------- If column value length > 30 
+            if (columnValue.length()> maxDisplayableSize   //------- If column value length > 30
                 && columnValue.indexOf("</a>") == -1  //---------and it is not heyperLinked then render a button for details
-               ) 
+               )
             {   %>
 			<%=columnValue.substring(0,maxDisplayableSize-1) + "..."%> <input
 			name="Det" type="button"
-			onClick=" longTextViewer= window.open(); 
-                                                              <% for (int lineNum = 0 ; lineNum<columnValuePerLine.size() ; lineNum ++  ) 
+			onClick=" longTextViewer= window.open();
+                                                              <% for (int lineNum = 0 ; lineNum<columnValuePerLine.size() ; lineNum ++  )
                                                               {
-                                                               %>longTextViewer.document.write('<%=columnValuePerLine.elementAt(lineNum)%><br>');<% 
+                                                               %>longTextViewer.document.write('<%=columnValuePerLine.elementAt(lineNum)%><br>');<%
                                                               } %>
                                                             "
 			value="Det">
 		<%
             }
             else
-            { 
+            {
                 %>
 				<%=(columnValue != null)? Support.Misc.repalceAll(columnValue , "\n" , "<br>"): null %>
-				<% 
+				<%
             }
             %></td><%
             //------------------End of Rendering The Column Value---------------
@@ -461,15 +456,15 @@ if (rowIdFound && !printable)
             }
             try
             {
-            Support.HTML.AnchorTag at = new Support.HTML.AnchorTag(columnValue , "a") ; 
-            if (at.isHtmlTag("a") ) //-------if it is a hyperLinked Number 
-            { 
+            Support.HTML.AnchorTag at = new Support.HTML.AnchorTag(columnValue , "a") ;
+            if (at.isHtmlTag("a") ) //-------if it is a hyperLinked Number
+            {
                 bd = new java.math.BigDecimal(at.getValue());
                 isHyberNumber = true;
             }
             }
             catch(Exception e) {}
-            if (isNumericColumn[count] || isHyberNumber ) //-------------if Column Type is Number 
+            if (isNumericColumn[count] || isHyberNumber ) //-------------if Column Type is Number
             {
               if (bd != null)
               {
@@ -477,19 +472,19 @@ if (rowIdFound && !printable)
               }
             }
           }
-      
+
           %>
 	</tr>
 	<%
         }
         //-------------Rendering Sum of Numeric Data------------------
-		LuQueryDetails queryDetail ; 
-        boolean renderAggregate = true ; 
+		LuQueryDetails queryDetail ;
+        boolean renderAggregate = true ;
         try {
         	 queryDetail = sqlReader.getQueryDetail(queryIndex);
         	renderAggregate = queryDetail.getShowAggregate().getBooleanValue() ;}
         catch (Exception e){}
-        
+
       if (renderAggregate )
       {
         %><tfoot><tr><%
@@ -504,18 +499,18 @@ if (rowIdFound && !printable)
 	        }
 
 			for (int count = 1 ; count<=columnCount ; count++ )
-	        { 
+	        {
 
 	          //----Do not show rowid column
 	          if ((rowIdFound && count == rowIdIndex) )
 	          { continue; }
 	          //---End of Do not show rowid column
-	          
-	          if (!isNumericColumn[count]) 
+
+	          if (!isNumericColumn[count])
 	          {
 	            %><td></td> <%
-	          }	  
-	          else 
+	          }
+	          else
 	          {
 	          %> <td><strong> <%=columnSums[count]%> </strong></td> <%
 	          }
@@ -523,18 +518,18 @@ if (rowIdFound && !printable)
 		}
         %></tr> </tfoot> <%
       }
-	
+
      if (rownum == -1 ) { %>
 	<tr id="noDataFoundRow_<%=queryIndex%>">
 		<td colspan="<%=columnCount%>" > No Data Found .... لا يوجد بيانات </td>
 	</tr>
 	<%} %>
 </table>
-  
+
 
 
 <%
-		db.release(); 
+		db.release();
 
 		java.util.Date endTime = new java.util.Date();
         long execTime = endTime.getTime()-startTime.getTime();
@@ -545,7 +540,7 @@ if (rowIdFound && !printable)
             Statement repstmt = repCon.createStatement();
             java.text.SimpleDateFormat dateFormatter = new java.text.SimpleDateFormat ("dd-MM-yyyy HH:mm:ss");// HH indicates Hours in 24 Format while hh indicates Hours in 12 format
             String insert = "insert into exec_stat (queryid, sequance ,  executed_by, db_url, starttime, endtime) values ";
-                    insert +=   "( "+id+","+queryIndex+ ", '"+ Misc.getConnectionUserName(con) +"', '"+con.getMetaData().getURL()+"', to_date('"+dateFormatter.format(startTime)+"','dd-mm-yyyy hh24:mi:ss') , to_date('"+dateFormatter.format(endTime)+"','dd-mm-yyyy hh24:mi:ss')  )";        
+                    insert +=   "( "+id+","+queryIndex+ ", '"+ Misc.getConnectionUserName(con) +"', '"+con.getMetaData().getURL()+"', to_date('"+dateFormatter.format(startTime)+"','dd-mm-yyyy hh24:mi:ss') , to_date('"+dateFormatter.format(endTime)+"','dd-mm-yyyy hh24:mi:ss')  )";
             repstmt.execute(insert);
             repCon.commit();
             repstmt.close();
@@ -554,19 +549,19 @@ if (rowIdFound && !printable)
       %>
 
 <%
-if (! AutoLog && ! printable) 
+if (! AutoLog && ! printable)
 {
 	%>
 	<script>
 		  $(function() {
 		    $( "#dialog_<%=queryIndex%>" ).dialog({
 		      autoOpen: false,
-			  width : 500 , 
-			  modal : true , 
+			  width : 500 ,
+			  modal : true ,
 		      show: { effect: "explode", duration: 500 },
 		      hide: { effect: "explode", duration: 500 }
 		    });
-		 
+
 		    $( "#opener_<%=queryIndex%>" ).click(function() {
 		      $( "#dialog_<%=queryIndex%>" ).dialog( "open" );
 		    });
@@ -574,7 +569,7 @@ if (! AutoLog && ! printable)
 	</script>
 	<% if (rownum > 0 ) {  %>
 	(<%=rownum + 1%>) Record(s)
-	<%} %> 
+	<%} %>
 
 	<% if (!printable) { %>
 	<div id="dialog_<%=queryIndex%>" title="More Options">
@@ -586,13 +581,13 @@ if (! AutoLog && ! printable)
 		</jsp:include>
 	 </div>
 	<%}%>
-			
-	<% 
+
+	<%
 }
       }
       if (rs != null) rs.close();
       if (stmt != null) stmt.close();
-      
+
      %>
 </div>
 
