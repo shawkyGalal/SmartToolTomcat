@@ -1,6 +1,5 @@
 
 
-<%@page import="com.google.cloud.bigquery.LegacySQLTypeName"%>
 <%@page import="Support.*, java.util.*, java.io.* , java.sql.* , java.text.SimpleDateFormat , javax.faces.model.SelectItem "%>
 <%@page import="Support.event.resource.system.*"%>
 <%@page import="com.implex.database.map.services.*"%>
@@ -10,22 +9,21 @@
 <%@page import="com.smartValue.support.map.LuQueryDetails"%>
 <%@ page import="com.google.cloud.bigquery.BigQuery , com.google.cloud.bigquery.BigQueryOptions
                   , com.google.cloud.bigquery.FieldValueList
-                  , com.google.cloud.bigquery.FieldValue
-                  , com.google.cloud.bigquery.Job 
-                  , com.google.cloud.bigquery.JobId 
-                  , com.google.cloud.bigquery.JobInfo 
-                  , com.google.cloud.bigquery.QueryJobConfiguration 
-                  , com.google.cloud.bigquery.QueryResponse 
+                  , com.google.cloud.bigquery.Job
+                  , com.google.cloud.bigquery.JobId
+                  , com.google.cloud.bigquery.JobInfo
+                  , com.google.cloud.bigquery.QueryJobConfiguration
+                  , com.google.cloud.bigquery.QueryResponse
                   , com.google.cloud.bigquery.TableResult
                   , com.google.auth.oauth2.GoogleCredentials
-				  , com.google.auth.oauth2.ServiceAccountCredentials 
+				  , com.google.auth.oauth2.ServiceAccountCredentials
 				  , com.google.cloud.bigquery.Field
 				  , java.io.File
 				  , java.io.FileInputStream
 				  , java.io.IOException
                   , java.util.UUID" %>
 <%@page errorPage="errorPage.jsp"%>
-<%@page  contentType="text/html;charset=UTF-8"%>	
+<%@page  contentType="text/html;charset=UTF-8"%>
 <%request.setCharacterEncoding("UTF-8");%>
 <% String appURL = Support.Misc.getAppURL(request) ;  %>
 
@@ -46,15 +44,15 @@
 <link href="<%=appURL%>/jQueryAssets/jquery.ui.theme.min.css" rel="stylesheet" type="text/css">
 <link href="<%=appURL%>/jQueryAssets/jquery.ui.tabs.min.css" rel="stylesheet" type="text/css">
 
-<% 
+<%
 request.setCharacterEncoding("UTF-8");
 Connection con = (Connection)session.getAttribute("con");
 Connection repCon = (Connection)session.getAttribute("repCon");
 
-boolean printable = ( request.getParameter("printable") != null  && request.getParameter("printable").equalsIgnoreCase("true") ); 			
+boolean printable = ( request.getParameter("printable") != null  && request.getParameter("printable").equalsIgnoreCase("true") );
 boolean AutoLog  = ( request.getParameter("AutoLog") != null ) ; //----To Enable automatically read page contents
   if( ( repCon == null || repCon.isClosed()) && AutoLog )
-{ 
+{
     XMLConfigFileReader aa =  Misc.getXMLConfigFileReader(false ) ; // new XMLConfigFileReader( false);
     repCon = aa.reposatoryConn.generateConnection();
     session.setAttribute("repCon",repCon);
@@ -62,14 +60,14 @@ boolean AutoLog  = ( request.getParameter("AutoLog") != null ) ; //----To Enable
 if (con == null || con.isClosed())
 {
   if( AutoLog)
-  { 
+  {
    //--TO be used at Normal Production ---
-   XMLConfigFileReader aa =  Misc.getXMLConfigFileReader(false ) ; 
+   XMLConfigFileReader aa =  Misc.getXMLConfigFileReader(false ) ;
    //Misc abc = new Misc(repCon);
    String autologinDB =SysConfigParams.getAutoLogin_Environment_Name();// abc.getSystemParameterValue(8);
    String autoLoginUserName = SysConfigParams.getAutoLogin_Username();// abc.getSystemParameterValue(9);
    String autoLoginPassword = SysConfigParams.getAutoLogin_Password();// abc.getSystemParameterValue(10);
-   
+
    con = aa.getConnParmsByName(autologinDB).generateConnection(autoLoginUserName, autoLoginPassword , "NORMAL");
    session.setAttribute("con",con);
    }
@@ -82,14 +80,14 @@ if (con == null || con.isClosed())
 String id = request.getParameter("id");
 
 Support.SqlReader sqlReader = (Support.SqlReader)request.getAttribute("sqlReader");
-if (sqlReader == null) 
+if (sqlReader == null)
 {
-  String lookupTableName = "LU_QUERIES" ; 	
-  sqlReader = new Support.SqlReader(repCon,lookupTableName , "QUERY_BODY",  id, session , request); 
+  String lookupTableName = "LU_QUERIES" ;
+  sqlReader = new Support.SqlReader(repCon,lookupTableName , "QUERY_BODY",  id, session , request);
 }
 
 int queryIndex = Integer.parseInt( request.getParameter("queryIndex"));
-LuQueryDetails queryDetails = null; 
+LuQueryDetails queryDetails = null;
 try { queryDetails = sqlReader.getQueryDetail(queryIndex) ; }
 catch (Exception e) {}
 		String[] queryStmt = sqlReader.getQueryStatments();
@@ -113,9 +111,9 @@ catch (Exception e) {}
 
 <!-- script for DataTable (Search & sorting )  -->
 	<link rel="stylesheet" type="text/css" href="<%=appURL%>/includes/dataTable/dt-1.10.13/datatables.min.css"/>
- 
+
 	<script type="text/javascript" src="<%=appURL%>/includes/dataTable/dt-1.10.13/datatables.min.js"></script>
-<!-- End of script for DataTable (Search & sorting )  -->        
+<!-- End of script for DataTable (Search & sorting )  -->
 
 <%@ include file="includes/jquery_commons.js"%>
 <script type="text/javascript">
@@ -125,27 +123,27 @@ $(window).load(function() {
 </script>
 </head>
 <div>
- 
-     
+
+
 <strong><br>
 <div id="div<%=id%>_<%=queryIndex%>" >
-<%=titles[queryIndex]%> 
+<%=titles[queryIndex]%>
 
 <%-- // This Script To Display the Data in a Pivot Table --%>
 <script	language="JavaScript" type="text/JavaScript">
 		var detailHidden_<%=queryIndex%> = true;
 		var divHight_<%=queryIndex%>  ;
 		var alreadyRendered_<%=queryIndex%> = false ;
-		google.load("visualization", "1", {packages:["corechart", "charteditor"]});		
+		google.load("visualization", "1", {packages:["corechart", "charteditor"]});
 
 		function toggleShowPivotTable_<%=queryIndex %>(showAnalytics)
 		{
 			var pivotDiv = document.all['Pivot_out<%=id%>_<%=queryIndex %>_container'] ;
 			var controlButton = document.all['toggleViewPivitTable_<%=queryIndex %>'] ;
 			try {
-			//if (! alreadyRendered_<%=queryIndex%> ) 
+			//if (! alreadyRendered_<%=queryIndex%> )
 				{
-				
+
 					var derivers = $.pivotUtilities.derivers;
 			        var renderers = $.extend($.pivotUtilities.renderers,
 			            $.pivotUtilities.gchart_renderers);
@@ -156,60 +154,60 @@ $(window).load(function() {
 		            var tableData = document.getElementById("resSetTable<%=id%>_<%=queryIndex %>") ; // $("#resSetTable<%=id%>_<%=queryIndex %>") ;
 		             var pivotAttributes = <%= (queryDetails.getPivottableInitParamsValue()!=null)? queryDetails.getPivottableInitParamsValue() : "''" %>  ;
 
-		            	
+
 				}
 				if (showAnalytics)
 					$("#Pivot_out<%=id%>_<%=queryIndex %>").pivotUI($("#resSetTable<%=id%>_<%=queryIndex %>") , pivotAttributes  );
-		            else 
+		            else
 		            $("#Pivot_out<%=id%>_<%=queryIndex %>").pivot($("#resSetTable<%=id%>_<%=queryIndex %>") , pivotAttributes  );
-				// This Script is To Enable saving the pivot table status  
+				// This Script is To Enable saving the pivot table status
 				$("#savePivotStatus<%=id%>_<%=queryIndex%>").on("click", function(){
 	                var config = $("#Pivot_out<%=id%>_<%=queryIndex%>").data("pivotUIOptions");
 	                var config_copy = JSON.parse(JSON.stringify(config));
 	                //delete some values which will not serialize to JSON
 	                delete config_copy["aggregators"];
 	                delete config_copy["renderers"];
-	                pivotAttributes = JSON.stringify(config_copy) ; 
+	                pivotAttributes = JSON.stringify(config_copy) ;
 	                //$.cookie("pivotConfig<%=id%>_<%=queryIndex%>", JSON.stringify(config_copy));
-				    
-	               	                
-				    // Saving new value to db  
+
+
+				    // Saving new value to db
 					var updateResultDivID = 'updateResult<%=id%>_<%=queryIndex %>' ;
 				    var updateURL =  '/SmartTool/updateDBAttribute.jsp?isHijriDate=false&isDateTime=false&isDate=false&tableName=LU_QUERY_DETAILS&tableOwner=SUPPORT&columnName=PIVOTTABLE_INIT_PARAMS&rowIdValue=<%=queryDetails.getRowIdString()%>&newValue=' + adjustNewValue(encodeURIComponent(pivotAttributes) ) ;
-	                alert('UpdateURL = ' +  updateURL ) ; 
-	                sendAjaxRequestToJsp(encodeURI(updateURL) , updateResultDivID) ; 
+	                alert('UpdateURL = ' +  updateURL ) ;
+	                sendAjaxRequestToJsp(encodeURI(updateURL) , updateResultDivID) ;
 
-	                
+
 	            });
-	
+
 	            $("#restorePivotStatus<%=id%>_<%=queryIndex%>").on("click", function(){
 	                $("#Pivot_out<%=id%>_<%=queryIndex%>").pivotUI($("#resSetTable<%=id%>_<%=queryIndex %>"), JSON.parse(pivotAttributes), true);
 	        	});
-        
+
 			}
-			
+
 		   	catch ( err )
-		   	{ 
-			  pivotDiv.style.color = "red" ; 
-		   	  pivotDiv.innerHTML = 'Smart Tool Error PVT:001: Unable To Render Pivoit Table Due To : ' + err ; 
-		   	  throw err ; 
+		   	{
+			  pivotDiv.style.color = "red" ;
+		   	  pivotDiv.innerHTML = 'Smart Tool Error PVT:001: Unable To Render Pivoit Table Due To : ' + err ;
+		   	  throw err ;
 		   	 }
-		   	finally 
+		   	finally
 		   	{divHight_<%=queryIndex%>  = pivotDiv.style.height ;
-		     alreadyRendered_<%=queryIndex%> = true ;}      
-			
-			
+		     alreadyRendered_<%=queryIndex%> = true ;}
+
+
 			if (detailHidden_<%=queryIndex%>)
 			{
 			pivotDiv.style.height = "" ; //divHight_<%=queryIndex%> ;
   			pivotDiv.style.visibility = 'visible';
 			detailHidden_<%=queryIndex %> = false;
-			controlButton.title = 'Hide Pivot Table' ; 
+			controlButton.title = 'Hide Pivot Table' ;
 			}
 			else
 			{
-			divHight_<%=queryIndex%> = 	pivotDiv.style.height ; 
-			pivotDiv.style.height = 0 ; 
+			divHight_<%=queryIndex%> = 	pivotDiv.style.height ;
+			pivotDiv.style.height = 0 ;
 			pivotDiv.style.visibility = 'hidden';
 			detailHidden_<%=queryIndex %> = true;
 			controlButton.title = 'Show Pivot Table' ;
@@ -218,24 +216,24 @@ $(window).load(function() {
 </script>
 
 <script>
-// Jquery Code to Add Search and filtering cabability to the datatable 
-function showTableFiltering_<%=queryIndex %>() 
+// Jquery Code to Add Search and filtering cabability to the datatable
+function showTableFiltering_<%=queryIndex %>()
 {
-	var filterRow = document.getElementById('filteringRow_<%=id %>_<%=queryIndex %>') ; 
-	filterRow.style.display = 'table-row' ; 
+	var filterRow = document.getElementById('filteringRow_<%=id %>_<%=queryIndex %>') ;
+	filterRow.style.display = 'table-row' ;
     // Setup - add a text input to each footer cell
     $('#resSetTable<%=id%>_<%=queryIndex %> thead td').each( function () {
         var title = $(this).text();
         $(this).html(  '<input type="text" placeholder="Search ' + title + '"  size = 10 />' );
     } );
- 
+
     // DataTable
     var table = $('#resSetTable<%=id%>_<%=queryIndex %>').DataTable();
- 
+
     // Apply the search
     table.columns().every( function () {
         var that = this;
- 
+
         $( 'input', this.header() ).on( 'keyup change', function () {
             if ( that.search() !== this.value ) {
                 that
@@ -245,7 +243,7 @@ function showTableFiltering_<%=queryIndex %>()
         } );
     } );
 }
-</script>	
+</script>
 <%if ( ! printable) {%>
 	<img title="Show Pivot Table"  name="toggleViewPivitTable_<%=queryIndex %>" src="<%=appURL%>/images/PivotTable.ico" height="25" onclick="toggleShowPivotTable_<%=queryIndex %>(true);">
 	<img title="Show Table Filtering"  name="toggleViewPivitTable_<%=queryIndex %>" src="<%=appURL%>/images/tableFilterIco.jpg" height="20" onclick="showTableFiltering_<%=queryIndex %>();">
@@ -271,24 +269,24 @@ boolean smartToolAdmin =  loggedUser.isSmartToolAdmin () ;
     <div id = "updateResult<%=id%>_<%=queryIndex %>"> </div>
     <br /><br /><br />
  	<div id = "Pivot_out<%=id%>_<%=queryIndex %>"    >
-		Not Able to render Data in Pivot Table 
+		Not Able to render Data in Pivot Table
 	</div>
-</div> 
+</div>
 
 </div>
 </strong>
 
 
-<% // Start Executing The Query against Google Cloud Big Query  
+<% // Start Executing The Query against Google Cloud Big Query
 	java.util.Date startTime = new java.util.Date();
  	GoogleCredentials credentials;
 	File credentialsPath = new File(XMLConfigFileReader.getConfigurationHome() + File.separator + "epm.smartvalue.json");  // TODO: update to your key path.
-	FileInputStream serviceAccountStream = new FileInputStream(credentialsPath); 
+	FileInputStream serviceAccountStream = new FileInputStream(credentialsPath);
 	credentials = ServiceAccountCredentials.fromStream(serviceAccountStream);
 
 	BigQuery bigQuery = BigQueryOptions.newBuilder().setCredentials(credentials).build().getService();
 	QueryJobConfiguration queryConfig =
-		    QueryJobConfiguration.newBuilder( queryStmt[queryIndex]) 
+		    QueryJobConfiguration.newBuilder( queryStmt[queryIndex])
 		        .setUseLegacySql(false)
 		        .build();
 
@@ -319,29 +317,27 @@ boolean smartToolAdmin =  loggedUser.isSmartToolAdmin () ;
 	<thead>
 		<tr>
 			<% for (Field f : result.getSchema().getFields())
-				{ 
-					out.print("<th>"+ f.getName() + "</th>") ; 	
-				} 
-			%>	
+				{
+					out.print("<th>"+ f.getName() + "</th>") ;
+				}
+			%>
 		</tr>
 	</thead>
 	<%
     	int rownum = -1;
     //-------rendering Data--------------------
-		for (FieldValueList row : result.iterateAll()) 
+		for (FieldValueList row : result.iterateAll())
 		{
-			rownum++; 
-			out.print("<tr>"); 
+			rownum++;
+			out.print("<tr>");
 			for (Field f : result.getSchema().getFields())
 			{
-				LegacySQLTypeName typeName =  f.getType() ;
-				FieldValue fieldValue = row.get(f.getName()) ; 
-				out.print("<td>"+ fieldValue.getStringValue() + "</td>" )  ; 
+				out.print("<td>"+ row.get(f.getName()).getStringValue() + "</td>" )  ;
 			}
 			out.print("</tr>");
 		}
     %> </table>
-    <% 
+    <%
     //-----End of rendering Data--------------------
 
 		java.util.Date endTime = new java.util.Date();
@@ -353,26 +349,26 @@ boolean smartToolAdmin =  loggedUser.isSmartToolAdmin () ;
             Statement repstmt = repCon.createStatement();
             java.text.SimpleDateFormat dateFormatter = new java.text.SimpleDateFormat ("dd-MM-yyyy HH:mm:ss");// HH indicates Hours in 24 Format while hh indicates Hours in 12 format
             String insert = "insert into exec_stat (queryid, sequance ,  executed_by, db_url, starttime, endtime) values ";
-                    insert +=   "( "+id+","+queryIndex+ ", '"+ Misc.getConnectionUserName(con) +"', '"+con.getMetaData().getURL()+"', to_date('"+dateFormatter.format(startTime)+"','dd-mm-yyyy hh24:mi:ss') , to_date('"+dateFormatter.format(endTime)+"','dd-mm-yyyy hh24:mi:ss')  )";        
+                    insert +=   "( "+id+","+queryIndex+ ", '"+ Misc.getConnectionUserName(con) +"', '"+con.getMetaData().getURL()+"', to_date('"+dateFormatter.format(startTime)+"','dd-mm-yyyy hh24:mi:ss') , to_date('"+dateFormatter.format(endTime)+"','dd-mm-yyyy hh24:mi:ss')  )";
             repstmt.execute(insert);
             repCon.commit();
             repstmt.close();
         //--End loging the execution into reposatory DB
         }
 
-if (! AutoLog && ! printable) 
+if (! AutoLog && ! printable)
 {
 	%>
 	<script>
 		  $(function() {
 		    $( "#dialog_<%=queryIndex%>" ).dialog({
 		      autoOpen: false,
-			  width : 500 , 
-			  modal : true , 
+			  width : 500 ,
+			  modal : true ,
 		      show: { effect: "explode", duration: 500 },
 		      hide: { effect: "explode", duration: 500 }
 		    });
-		 
+
 		    $( "#opener_<%=queryIndex%>" ).click(function() {
 		      $( "#dialog_<%=queryIndex%>" ).dialog( "open" );
 		    });
@@ -380,7 +376,7 @@ if (! AutoLog && ! printable)
 	</script>
 	<% if (rownum > 0 ) {  %>
 		(<%=rownum + 1%>) Record(s)
-	<%} %> 
+	<%} %>
 
 	<% if (!printable) { %>
 	<div id="dialog_<%=queryIndex%>" title="More Options">
@@ -392,10 +388,10 @@ if (! AutoLog && ! printable)
 		</jsp:include>
 	 </div>
 	<%}%>
-			
-	<% 
+
+	<%
 }
-      
+
      %>
 </div>
 
